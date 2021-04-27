@@ -11,7 +11,7 @@ This automation makes a few generalized assumptions:
 
 * Outgoing mail is only ever left in the mailbox in the morning, before the typical delivery time and only when a member of the household is home. (If outgoing mail is left during a pickup in the evening, or in the morning while picking up old mail we ignore this edge case and assume the box to still be empty – the status of if the mailbox needs to be checked is the primary motivator for this automation) + as in the last case, outgoing mail is typically very low frequency and can generally be ignored.
 
-* In the case where the mailbox door was left open (> 1min or overnight etc) we assume that the door is only ever closed by someone picking up the (incoming) mail and not from the mail courier and we can assume the box was just emptied. Thought being that a household member would notice an open door in the morning while leaving, or in the evening during pickup if the door had fallen open during mail delivery. That and the frequency of outgoing mail is low so it’s unlikely that the door would fall open after dropping off outgoing mail.
+* In the case where the mailbox door was left open (> 1min or overnight etc) we assume that the door is only ever closed by someone picking up the (incoming) mail, not from the mail courier, and we can assume the box was just emptied. Thought being that a household member would notice an open door in the morning while leaving, or in the evening during pickup if the door had fallen open during mail delivery. That and the frequency of outgoing mail is low so it’s unlikely that the door would fall open after dropping off outgoing mail.
 
 [u]Logic walkthrough:[/u]
 
