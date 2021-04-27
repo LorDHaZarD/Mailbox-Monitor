@@ -45,6 +45,8 @@ After earliest delivery and the door is open:
 
 If the door state is open, wait a period of time (1 minute)… if that timer expires, the door has been left open - mark state as **Left Open**. Automation is configured in restart mode, therefore a close door trigger will terminate this wait early, run through the default condition earlier and fail (exit cleanly) on this test without any mailbox state changes
 
+And yes, I acknowledge that the Incoming:Old and New states could functionally be one in the same but this gives me the opportunity to track the 'age' of the mail left in the mailbox as well via other automations.
+
 **[u]That's great and all... Just show me the code![/u]**
 
 I wanted to make this a blueprint on the community forums – but blueprints don’t allow for automatic generation of helper variables (and I had issues using !input with input_select variables) so there’s some manual user intervention required. 
