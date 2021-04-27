@@ -5,7 +5,9 @@ I have a door contact sensor (reed switch) on my mailbox like many of us who've 
 
 This automation makes a few generalized assumptions:
 
-* Mail is only delivered once per day and never before a certain time of day (11:00am for instance - configurable).
+* Mail is only delivered once per day and never before a certain time of day (11:00am for instance - configurable).  This will get out of sync if you have multiple mail carriers, neighbors dropping off mail, newspaper delivery in your mailbox etc... none of which are issues for me personally
+
+* Similar to above, mail is only checked once a day and presumably always after mail has been delivered.  We assume that those checking the mail will know the state of the mailbox before looking (the whole point of tracking state info).  This may get out of sync if a house-sitter or guest is checking mail during the window when mail might be delivered.
 
 * Outgoing mail is only ever left in the mailbox in the morning, before the typical delivery time and only when a member of the household is home. (If outgoing mail is left during a pickup in the evening, or in the morning while picking up old mail we ignore this edge case and assume the box to still be empty – the status of if the mailbox needs to be checked is the primary motivator for this automation) + as in the last case, outgoing mail is typically very low frequency and can generally be ignored.
 
