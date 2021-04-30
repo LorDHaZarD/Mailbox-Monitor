@@ -56,8 +56,8 @@ or in its original form below:
 
 [details="Mailbox Monitoring Automation"]
 ```
-alias: Mailbox Monitoring
-description: 'mailbox state monitoring'
+alias: 'Mailbox Monitoring (ver: 2.0)'
+description: mailbox state monitoring
 trigger:
   - platform: state
     entity_id: binary_sensor.mailbox_is_open
@@ -70,38 +70,11 @@ action:
           - condition: time
             before: '00:01:00'
         sequence:
-          - choose:
-              - conditions:
-                  - condition: or
-                    conditions:
-                      - condition: state
-                        entity_id: input_select.mailbox_status
-                        state: 'Incoming:New'
-                      - condition: state
-                        entity_id: input_select.mailbox_status
-                        state: 'Incoming:Old'
-                sequence:
-                  - service: input_select.select_option
-                    target:
-                      entity_id: input_select.mailbox_status
-                    data:
-                      option: 'Incoming:Old'
-              - conditions:
-                  - condition: state
-                    entity_id: input_select.mailbox_status
-                    state: Left Open
-                sequence:
-                  - service: input_select.select_option
-                    target:
-                      entity_id: input_select.mailbox_status
-                    data:
-                      option: Left Open
-            default:
-              - service: input_select.select_option
-                target:
-                  entity_id: input_select.mailbox_status
-                data:
-                  option: Empty
+          - service: input_select.select_option
+            target:
+              entity_id: input_select.mailbox_status
+            data:
+              option: 'Incoming:Old'
       - conditions:
           - condition: and
             conditions:
@@ -127,6 +100,14 @@ action:
                       entity_id: input_select.mailbox_status
                     data:
                       option: Empty
+                  - service: input_datetime.set_datetime
+                    target:
+                      entity_id: input_datetime.mailbox_last_checked
+                    data:
+                      datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+                  - service: counter.reset
+                    target:
+                      entity_id: counter.mailbox_mail_count
               - conditions:
                   - condition: and
                     conditions:
@@ -153,35 +134,56 @@ action:
                   entity_id: input_select.mailbox_status
                 data:
                   option: Empty
-      - conditions:
-          - condition: time
-            after: '11:00:00'
-          - condition: state
-            entity_id: binary_sensor.mailbox_is_open
-            state: 'on'
-        sequence:
-          - choose:
-              - conditions:
-                  - condition: or
-                    conditions:
-                      - condition: state
-                        entity_id: input_select.mailbox_status
-                        state: 'Incoming:New'
-                      - condition: state
-                        entity_id: input_select.mailbox_status
-                        state: 'Incoming:Old'
-                sequence:
-                  - service: input_select.select_option
-                    target:
-                      entity_id: input_select.mailbox_status
-                    data:
-                      option: Empty
-            default:
-              - service: input_select.select_option
+              - service: input_datetime.set_datetime
                 target:
-                  entity_id: input_select.mailbox_status
+                  entity_id: input_datetime.mailbox_last_checked
                 data:
-                  option: 'Incoming:New'
+                  datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+      - conditions:
+          - condition: and
+            conditions:
+              - condition: time
+                after: '11:00:00'
+                before: '15:00:00'
+              - condition: state
+                entity_id: binary_sensor.mailbox_is_open
+                state: 'on'
+        sequence:
+          - service: input_select.select_option
+            target:
+              entity_id: input_select.mailbox_status
+            data:
+              option: 'Incoming:New'
+          - service: input_datetime.set_datetime
+            target:
+              entity_id: input_datetime.mailbox_last_delivered
+            data:
+              datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+          - service: counter.increment
+            target:
+              entity_id: counter.mailbox_mail_count
+      - conditions:
+          - condition: and
+            conditions:
+              - condition: time
+                after: '15:00:00'
+              - condition: state
+                entity_id: binary_sensor.mailbox_is_open
+                state: 'on'
+        sequence:
+          - service: input_select.select_option
+            target:
+              entity_id: input_select.mailbox_status
+            data:
+              option: Empty
+          - service: input_datetime.set_datetime
+            target:
+              entity_id: input_datetime.mailbox_last_checked
+            data:
+              datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+          - service: counter.reset
+            target:
+              entity_id: counter.mailbox_mail_count
     default: []
   - condition: state
     entity_id: binary_sensor.mailbox_is_open
@@ -197,7 +199,6 @@ action:
     data:
       option: Left Open
 mode: restart
-
 ```
 [/details]
 
@@ -214,6 +215,27 @@ input_select:
       - Incoming:Old
       - Left Open
     icon: mdi:mailbox
+    
+input_datetime:
+  mailbox_last_checked:
+    name: Mailbox Last Checked
+    has_date: true
+    has_time: true
+    icon: "mdi:email-sync"
+  mailbox_last_delivered:
+    name: Mailbox Last Delivered
+    has_date: true
+    has_time: true
+    icon: "mdi:email-receive-outline"
+
+counter:
+  mailbox_mail_count:
+    name: Mailbox Mail Count
+    initial: 0
+    step: 1
+    minimum: 0
+    maximum: 256
+    icon: "mdi:email-multiple-outline"
 ```
 And if you want the box status indicated graphically in lovelace, custom:button-card works pretty well:
 ```
