@@ -55,7 +55,7 @@ I did blueprint what I could though, found here: XXXXXXXXXXXXX
 or in its original form below:
 
 [details="Mailbox Monitoring Automation"]
-```
+```yaml
 alias: 'Mailbox Monitoring (ver: 2.0)'
 description: mailbox state monitoring
 trigger:
@@ -204,7 +204,7 @@ mode: restart
 
 
 *[u]You’ll also need to add this to your configuration.yaml:[/u]*
-```
+```yaml
 input_select:
   mailbox_status:
     name: Mailbox Status
@@ -238,7 +238,7 @@ counter:
     icon: "mdi:email-multiple-outline"
 ```
 And if you want the box status indicated graphically in lovelace, custom:button-card works pretty well:
-```
+```yaml
 type: 'custom:button-card'
 entity: input_select.mailbox_status
 color_type: icon
