@@ -5,13 +5,13 @@ I have a door contact sensor (reed switch) on my mailbox like many of us who've 
 
 This automation makes a few generalized assumptions:
 
-* Mail is only delivered once per day and within a certain window (for me this time is between 11:00 am and 3:00 pm)  Tune this if you have multiple mail carriers, neighbors dropping off mail, newspaper delivery in your mailbox etc... none of which are issues for me personally
+* Mail is only delivered within a certain window (for me this time is between 11:00 am and 5:00 pm)  Tune this if you have multiple mail carriers, neighbors dropping off mail, newspaper delivery in your mailbox etc... or just make it equal to the timeframe when you'll never check the mailbox
 
-* Similar to above, mail is only either in the morning or in the evening and presumably never during the 'delivery window'.  We assume that those checking the mail will know the state of the mailbox before looking (the whole point of tracking state info).  This may get out of sync if a house-sitter or guest is checking mail during the window when mail might be delivered.
+* Similar to above, mail is only checked either in the morning or in the evening and presumably never during the 'delivery window'.  We assume that those checking the mail will know the state of the mailbox before looking (the whole point of tracking state info).  This may get out of sync if a house-sitter or guest is checking mail during the window when mail might be delivered.
 
 * Outgoing mail is only ever left in the mailbox in the morning, before the typical delivery time and only when a member of the household is home. (If outgoing mail is left during a pickup in the evening, or in the morning while picking up old mail we ignore this edge case and assume the box to still be empty – the status of if the mailbox needs to be checked is the primary motivator for this automation) + as in the last case, outgoing mail is typically very low frequency and can generally be ignored.
 
-* In the case where the mailbox door was left open (> 1min for instance) we assume that the door is only ever closed by someone picking up the (incoming) mail, not from the mail courier, and therefor we can assume the box was just emptied and checked. Thought being that a household member would notice an open door in the morning while leaving, or in the evening during pickup if the door had fallen open during mail delivery. That and the frequency of outgoing mail is low so it’s unlikely that the door would fall open after dropping off outgoing mail.
+* In the case where the mailbox door was left open (> 1min for instance) we assume that the door is only ever closed by someone picking up the (incoming) mail, not from the mail courier, and therefore we can assume the box was just emptied and checked. Thought being that a household member would notice an open door in the morning while leaving, or in the evening during pickup if the door had fallen open during mail delivery. That and the frequency of outgoing mail is low so it’s unlikely that the door would fall open after dropping off outgoing mail.
 
 [u]Logic walkthrough:[/u]
 
@@ -21,13 +21,13 @@ This automation makes a few generalized assumptions:
 
 Midnight rollover:
 
-1. If there’s still mail in the box (either new or old), it’s now marked as **Incoming:Old**
+1. If there’s still (new) mail in the box, it’s now marked as **Incoming:Old**
 
 - otherwise do nothing
 
 Morning, prior to earliest delivery and the door is open:
 
-1. If there was mail in the box, someone just picked it up (household member, house sitter etc) – mark state as **Empty**, reset mail counter and update last checked time
+1. If there was mail in the box (new or old), someone just picked it up (household member, house sitter etc) – mark state as **Empty**, reset mail counter and update last checked time
 
 2. If the box was empty, and an adult is home, assume outgoing mail was just dropped off – mark state as **Outgoing**
 
@@ -67,8 +67,13 @@ condition: []
 action:
   - choose:
       - conditions:
-          - condition: time
-            before: '00:01:00'
+          - condition: and
+            conditions:
+              - condition: time
+                before: '00:01:00'
+              - condition: state
+                entity_id: input_select.mailbox_status
+                state: 'Incoming:New'
         sequence:
           - service: input_select.select_option
             target:
@@ -144,7 +149,7 @@ action:
             conditions:
               - condition: time
                 after: '11:00:00'
-                before: '15:00:00'
+                before: '17:00:00'
               - condition: state
                 entity_id: binary_sensor.mailbox_is_open
                 state: 'on'
@@ -166,7 +171,7 @@ action:
           - condition: and
             conditions:
               - condition: time
-                after: '15:00:00'
+                after: '17:00:00'
               - condition: state
                 entity_id: binary_sensor.mailbox_is_open
                 state: 'on'
